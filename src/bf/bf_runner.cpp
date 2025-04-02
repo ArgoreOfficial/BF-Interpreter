@@ -44,14 +44,16 @@ void BrainFuckRunner::parse_bytecode( std::string _source )
 
 	BFBytecode current_bc{};
 
-	while ( *pChar != 0 )
+	while ( pChar != _source.end()._Ptr )
 	{
 		char c = *pChar;
+		pChar++;
 		if ( !is_legal_char( c ) )
 		{
-			pChar++;
 			continue;
 		}
+
+		current_bc.count = 1;
 
 		switch ( c )
 		{
@@ -74,10 +76,10 @@ void BrainFuckRunner::parse_bytecode( std::string _source )
 			current_bc.type = BFCmd::Decr;
 			while ( *pChar == '-' ) current_bc.count++, pChar++;
 		}; break;
-		case '.': { pChar++; current_bc.type = BFCmd::pOut;      }; break;
-		case ',': { pChar++; current_bc.type = BFCmd::pIn;       }; break;
-		case '[': { pChar++; current_bc.type = BFCmd::LoopBegin; }; break;
-		case ']': { pChar++; current_bc.type = BFCmd::LoopEnd;   }; break;
+		case '.': { current_bc.type = BFCmd::pOut;      }; break;
+		case ',': { current_bc.type = BFCmd::pIn;       }; break;
+		case '[': { current_bc.type = BFCmd::LoopBegin; }; break;
+		case ']': { current_bc.type = BFCmd::LoopEnd;   }; break;
 		}
 
 		bytecode.push_back( current_bc );

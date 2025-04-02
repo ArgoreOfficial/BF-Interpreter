@@ -20,16 +20,16 @@ int main()
 	
 	ShowConsoleCursor( false );
 	
-	printf( "hello_world.bf:\n:-:  " );
 	runner.run_file( "../scripts/hello_world.bf" );
 	printf( "\n" );
 
-	printf( "size_test.bf:\n:-:  " );
 	runner.run_file( "../scripts/size_test.bf" );
 	printf( "\n" );
 	
-	printf( "weird_test.bf:\n:-:  " );
 	runner.run_file( "../scripts/weird_test.bf" );
+	printf( "\n" );
+	
+	runner.run_file( "../scripts/gol.bf" );
 	printf( "\n" );
 
 	ShowConsoleCursor( true );
