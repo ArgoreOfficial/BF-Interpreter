@@ -1,8 +1,6 @@
 #pragma once
 
-#include <stdio.h>
 #include <string>
-#include <conio.h>
 #include <vector>
 
 enum BFCmd
@@ -26,8 +24,6 @@ struct BFBytecode
 
 struct BrainFuckRunner
 {
-	std::string src = "";
-	std::string out_buffer = "";
 	std::vector<BFBytecode> bytecode;
 
 	uint16_t pc = 0;
@@ -40,7 +36,6 @@ struct BrainFuckRunner
 	uint8_t loop_stack_counter = 0;
 
 	void power_cycle();
-	void preprocessor( const std::string& _source );
 	void parse_bytecode( std::string _source );
 	
 	void push_stack( uint8_t _v ) {
@@ -64,6 +59,7 @@ struct BrainFuckRunner
 		return cell_memory[ pointer ]; 
 	}
 
+	void run_file( const std::string& _path );
 	void run( std::string _source );
 	void interpret_cmd();
 

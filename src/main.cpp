@@ -1,6 +1,3 @@
-#include <iostream>
-#include <fstream>
-
 #include <Windows.h>
 
 #include <bf/bf_runner.h>
@@ -20,16 +17,21 @@ void ShowConsoleCursor( bool showFlag )
 
 int main()
 {
-	std::string source, line;
-	std::ifstream file( "../hello_world.b" );
-	while ( std::getline( file, line ) )
-		source += line;
 	
 	ShowConsoleCursor( false );
 	
-	//runner.run( "++++[>++++++<-]>[>+++++>+++++++<<-]>>++++<[[>[[>>+<<-]<]>>>-]>-[>+>+<<-]>]++++ + [ > ++++++ + << ++ > -] > . << ." );
-	runner.run( source );
+	printf( "hello_world.bf:\n:-:  " );
+	runner.run_file( "../scripts/hello_world.bf" );
+	printf( "\n" );
+
+	printf( "size_test.bf:\n:-:  " );
+	runner.run_file( "../scripts/size_test.bf" );
+	printf( "\n" );
 	
+	printf( "weird_test.bf:\n:-:  " );
+	runner.run_file( "../scripts/weird_test.bf" );
+	printf( "\n" );
+
 	ShowConsoleCursor( true );
 
 	return 0;

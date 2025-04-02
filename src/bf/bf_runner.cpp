@@ -1,5 +1,11 @@
 #include "bf_runner.h"
 
+#include <iostream>
+#include <fstream>
+
+#include <stdio.h>
+#include <conio.h>
+
 static bool is_legal_char( char _c )
 {
 	switch ( _c )
@@ -19,9 +25,6 @@ static bool is_legal_char( char _c )
 
 void BrainFuckRunner::power_cycle()
 {
-	out_buffer = "";
-	src = "";
-
 	pc = 0;
 	cmd = {};
 
@@ -34,29 +37,6 @@ void BrainFuckRunner::power_cycle()
 	bytecode.clear();
 }
 
-
-void BrainFuckRunner::preprocessor( const std::string& _source )
-{
-	const size_t size = _source.size();
-	char* parsed = new char[ size + 1 ];
-
-	size_t parsed_size = 0;
-	for ( size_t i = 0; i < size; i++ )
-	{
-		char c = _source[ i ];
-		if ( !is_legal_char( c ) )
-			continue;
-
-		parsed[ parsed_size ] = c;
-		parsed_size++;
-	}
-
-	parsed[ parsed_size ] = 0;
-
-	src = std::string( parsed );
-	delete[] parsed;
-}
-
 void BrainFuckRunner::parse_bytecode( std::string _source )
 {
 	const size_t size = _source.size();
@@ -67,76 +47,73 @@ void BrainFuckRunner::parse_bytecode( std::string _source )
 	while ( *pChar != 0 )
 	{
 		char c = *pChar;
-		
+		if ( !is_legal_char( c ) )
+		{
+			pChar++;
+			continue;
+		}
+
 		switch ( c )
 		{
 		case '>': {
 			current_bc.type = BFCmd::Right;
-			while ( *pChar == '>' )
-			{
-				current_bc.count++;
-				pChar++;
-			}
+			while ( *pChar == '>' ) current_bc.count++, pChar++;
 		}; break;
 		case '<':
 		{
 			current_bc.type = BFCmd::Left;
-			while ( *pChar == '<' )
-			{
-				current_bc.count++;
-				pChar++;
-			}
+			while ( *pChar == '<' ) current_bc.count++, pChar++;
 		}; break;
 		case '+':
 		{
 			current_bc.type = BFCmd::Incr;
-			while ( *pChar == '+' )
-			{
-				current_bc.count++;
-				pChar++;
-			}
+			while ( *pChar == '+' ) current_bc.count++, pChar++;
 		}; break;
 		case '-':
 		{
 			current_bc.type = BFCmd::Decr;
-			while ( *pChar == '-' )
-			{
-				current_bc.count++;
-				pChar++;
-			}
+			while ( *pChar == '-' ) current_bc.count++, pChar++;
 		}; break;
-		case '.': { pChar++; current_bc.type = BFCmd::pOut; }; break;
-		case ',': { pChar++; current_bc.type = BFCmd::pIn; }; break;
+		case '.': { pChar++; current_bc.type = BFCmd::pOut;      }; break;
+		case ',': { pChar++; current_bc.type = BFCmd::pIn;       }; break;
 		case '[': { pChar++; current_bc.type = BFCmd::LoopBegin; }; break;
-		case ']': { pChar++; current_bc.type = BFCmd::LoopEnd; }; break;
+		case ']': { pChar++; current_bc.type = BFCmd::LoopEnd;   }; break;
 		}
 
 		bytecode.push_back( current_bc );
 		current_bc = {};
 	}
 
+	bytecode.push_back( { BFCmd::NullTerm, 0 } );
+}
+
+void BrainFuckRunner::run_file( const std::string& _path )
+{
+	std::string source, line;
+	std::ifstream file( _path );
+	if ( !file.is_open() )
+	{
+		printf( "Failed to open file %s\n", _path.c_str() );
+		return;
+	}
+
+	while ( std::getline( file, line ) )
+		source += line;
+
+	run( source );
 }
 
 void BrainFuckRunner::run( std::string _source )
 {
 	power_cycle();
-	preprocessor( _source );
-	parse_bytecode( src );
+	parse_bytecode( _source );
 
 	incr_pc();
 
 	while ( cmd.type != 0 )
 	{
-		printf( "\033[%d;%dH", 1, 1 );
-
-		for ( size_t i = 0; i < 12; i++ )
-			printf( "[%03i]", cell_memory[ i ] );
-		printf( "\n" );
-
 		interpret_cmd();
 		incr_pc();
-
-		printf( "%s\n", out_buffer.c_str() );
 	}
 }
 
@@ -149,8 +126,10 @@ void BrainFuckRunner::interpret_cmd()
 	case BFCmd::Incr:  { here() += cmd.count; } break;
 	case BFCmd::Decr:  { here() -= cmd.count; } break;
 
-	case BFCmd::pOut: { out_buffer += (char)here(); } break;
-	case BFCmd::pIn:
+	case BFCmd::pOut: { 
+		printf( "%c", (char)here() ); 
+	} break;
+	case BFCmd::pIn: 
 	{
 		char in = _getch();
 
@@ -161,7 +140,6 @@ void BrainFuckRunner::interpret_cmd()
 		case 26:   in = '\0'; break;
 		}
 
-		printf( "%i\n", in );
 		here() = in;
 	} break;
 
