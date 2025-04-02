@@ -5,6 +5,7 @@
 #include <fstream>
 
 #include <conio.h>
+#include <Windows.h>
 
 bool is_legal_char( char _c )
 {
@@ -36,8 +37,6 @@ struct BrainFuckRunner
 
 	uint16_t loop_stack[ 256 ] = { 0 };
 	uint8_t loop_stack_counter = 0;
-
-	std::vector<char> ran_chars{};
 
 	void preprocessor( const std::string _source )
 	{
@@ -73,8 +72,6 @@ struct BrainFuckRunner
 
 		std::memset( cell_memory, 0, sizeof( cell_memory ) );
 		std::memset( loop_stack, 0, sizeof( loop_stack ) );
-
-		ran_chars.clear();
 	}
 
 	void push_stack( uint8_t _v ) {
@@ -110,16 +107,17 @@ struct BrainFuckRunner
 
 		case '.': { out_buffer += (char)here(); } break;
 		case ',': { 
-			char c = 13;
-			char in = 0;
-			do
-			{
-				in = _getch();
-				if( in != 13 )
-					c = in;
-			} while ( in != 13 );
+			char in = _getch();
 
-			here() = c == 13 ? 10 : c;
+			switch ( in ) // special cases
+			{
+			case '\r': in = '\n'; break;
+			case EOF:  in = '\0'; break;
+			case 26:   in = '\0'; break;
+			}
+			
+			printf( "%i\n", in ); 
+			here() = in;
 		} break;
 
 		case '[':
@@ -154,8 +152,9 @@ struct BrainFuckRunner
 	void run( std::string _source )
 	{
 		power_cycle();
-		incr_pc();
 		preprocessor( _source );
+
+		incr_pc();
 
 		while ( cmd != 0 )
 		{
@@ -165,7 +164,6 @@ struct BrainFuckRunner
 				printf( "[%03i]", cell_memory[ i ] );
 			printf( "\n" );
 			
-			ran_chars.push_back( cmd );
 			interpret_cmd();
 			incr_pc();
 
@@ -176,6 +174,17 @@ struct BrainFuckRunner
 
 BrainFuckRunner runner{};
 
+void ShowConsoleCursor( bool showFlag )
+{
+	HANDLE out = GetStdHandle( STD_OUTPUT_HANDLE );
+
+	CONSOLE_CURSOR_INFO     cursorInfo;
+
+	GetConsoleCursorInfo( out, &cursorInfo );
+	cursorInfo.bVisible = showFlag; // set the cursor visibility
+	SetConsoleCursorInfo( out, &cursorInfo );
+}
+
 int main()
 {
 	std::string source, line;
@@ -183,7 +192,9 @@ int main()
 	while ( std::getline( file, line ) )
 		source += line;
 	
-	runner.run( source );
+	ShowConsoleCursor( false );
+	runner.run( "++++[>++++++<-]>[>+++++>+++++++<<-]>>++++<[[>[[>>+<<-]<]>>>-]>-[>+>+<<-]>]++++ + [ > ++++++ + << ++ > -] > . << ." );
+	ShowConsoleCursor( true );
 
 	return 0;
 }
