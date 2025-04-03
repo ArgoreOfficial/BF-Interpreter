@@ -77,14 +77,13 @@ void brainfuck::vm::interpret_instr()
 {
 	switch ( instr.type )
 	{
-	case opcode::Right: { pointer += instr.count; } break;
-	case opcode::Left:  { pointer -= instr.count; } break;
-	case opcode::Incr:  { _here() += instr.count; } break;
-	case opcode::Decr:  { _here() -= instr.count; } break;
+	case opcode::Right: pointer += instr.count; break;
+	case opcode::Left:  pointer -= instr.count; break;
+	case opcode::Incr:  _here() += instr.count; break;
+	case opcode::Decr:  _here() -= instr.count; break;
 
-	case opcode::pOut: { 
-		printf( "%c", (char)_here() ); 
-	} break;
+	case opcode::pOut: printf( "%c", (char)_here() ); break;
+
 	case opcode::pIn: 
 	{
 		char in = _getch();
@@ -99,31 +98,8 @@ void brainfuck::vm::interpret_instr()
 		_here() = in;
 	} break;
 
-	case opcode::LoopBegin:
-	{
-		if ( _here() == 0 )
-		{
-			uint32_t loop_counter = 0;
-			do
-			{
-				if      ( instr.type == opcode::LoopBegin ) loop_counter++;
-				else if ( instr.type == opcode::LoopEnd   ) loop_counter--;
-
-				if ( loop_counter > 0 ) _incr_pc();
-			} while ( loop_counter > 0 );
-		}
-		else
-			_push_stack( pc - 1 );
-
-	} break;
-
-	case opcode::LoopEnd:
-	{
-		uint16_t jmp_point = _pop_stack();
-		if ( _here() != 0 )
-			_jmp( jmp_point );
-
-	} break;
+	case opcode::LoopBegin: if ( _here() == 0 ) _jmp( instr.partner ); break;
+	case opcode::LoopEnd:   if ( _here() != 0 ) _jmp( instr.partner ); break;
 
 	}
 }

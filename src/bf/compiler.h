@@ -20,11 +20,11 @@ enum opcode : uint8_t
 	LoopEnd   = ']'
 };
 
-struct instruction
+struct alignas( 8 ) instruction
 {
 	opcode type;
-	uint32_t count = 0;
-	uint32_t partner = 0;
+	uint16_t count = 0;
+	uint16_t partner = 0;
 };
 
 struct loop_range

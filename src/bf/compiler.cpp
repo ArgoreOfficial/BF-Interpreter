@@ -57,7 +57,7 @@ brainfuck::compiler::error_code brainfuck::compiler::compile( std::vector<instru
 
 			loop_range range = loop_stack.top();
 			loop_stack.pop();
-			m_compiled[ range.begin ].partner = m_pointer - 1;
+			m_compiled[ range.begin ].partner = m_compiled.size();
 			current_instr.partner = range.begin;
 		} break;
 		}
