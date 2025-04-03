@@ -11,14 +11,12 @@ void brainfuck::vm::power_cycle()
 {
 	pc = 0;
 	instr = {};
-
-	loop_stack_counter = 0;
 	pointer = 0;
 
-	std::memset( cell_memory, 0, sizeof( cell_memory ) );
-	std::memset( loop_stack, 0, sizeof( loop_stack ) );
-
+	std::memset( cell_memory, 0, sizeof( cell_memory ) );	
 	bytecode.clear();
+
+	m_file_name = "EMBED";
 }
 
 void brainfuck::vm::run_file( const std::string& _path )
@@ -31,31 +29,25 @@ void brainfuck::vm::run_file( const std::string& _path )
 		return;
 	}
 
+	m_file_name = _path.substr( _path.find_last_of( "/\\" ) + 1 );
+
 	while ( std::getline( file, line ) )
-		source += line;
+		source += line + "\n";
 
 	run( source );
+
+	power_cycle();
 }
 
 void brainfuck::vm::run( const std::string& _source )
 {
-	power_cycle();
-	
 	compiler bfc{ _source };
-	compiler::error_code err = bfc.compile( bytecode );
-	switch( err )
-	{
-		case compiler::error_code::missing_loop_begin: 
-			printf( "Compile Error: Missing [ to match ] at X:Y\n" );
-			return;
+	compiler::error_code err = bfc.compile( m_file_name, bytecode );
 
-		case compiler::error_code::missing_loop_end: 
-			printf( "Compile Error: Missing ] to match [ at X:Y\n" );
-			return;
-		
-		case compiler::error_code::no_source_input: 
-			printf( "No source input\n" );
-			return;
+	if( err != compiler::error_code::success )
+	{
+		printf( "%s\n", bfc.get_error_message().c_str() );
+		return;
 	}
 
 	_incr_pc();

@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string>
 #include <stack>
+#include <format>
 
 namespace brainfuck {
 
@@ -42,24 +43,30 @@ struct compiler
 		missing_loop_end
 	};
 
-	compiler( const std::string& _source ) :
-		m_source{ _source }
-	{ }
+	compiler( const std::string& _source );
 
-	error_code compile( std::vector<instruction>& _out_vec );
+	error_code compile( const std::string& _file_name, std::vector<instruction>& _out_vec );
+
+	std::string get_error_message();
 
 private:
 
 	void _flush();
-	char _here() { return m_source[ m_pointer ]; }
+	char _here() { return m_source_lines[ m_line ][ m_pointer ]; }
 	void _incr() { m_pointer++; }
 
 	size_t _count_sequence( char _char );
 
-	std::string m_source;
+	std::vector<std::string> m_source_lines;
 	std::vector<instruction> m_compiled;
 	std::stack<loop_range> loop_stack;
 	size_t m_pointer = 0;
+	size_t m_line = 0;
+
+	size_t m_error_point = 0;
+	size_t m_error_line = 0;
+	std::string m_file_name = "";
+	std::string m_error_msg = "";
 };
 
 }
