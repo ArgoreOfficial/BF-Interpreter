@@ -1,10 +1,11 @@
+PROJECT_NAME = "BF-Interpreter"
 
-set_languages "cxx17"
+set_languages "cxx20"
 
 add_rules "mode.debug"
 add_rules "mode.release"
 
-target "C++ xmake Template"
+target(PROJECT_NAME)
     set_kind "binary" 
     
     set_basename "cpp_$(mode)_$(arch)"

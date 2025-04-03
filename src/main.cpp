@@ -1,8 +1,9 @@
-#include <Windows.h>
 
 #include <bf/bf_runner.h>
 
-BrainFuckRunner runner{};
+#include <Windows.h>
+
+brainfuck_vm runner{};
 
 void ShowConsoleCursor( bool showFlag )
 {
@@ -17,21 +18,12 @@ void ShowConsoleCursor( bool showFlag )
 
 int main()
 {
-	
 	ShowConsoleCursor( false );
 	
 	runner.run_file( "../scripts/hello_world.bf" );
-	printf( "\n" );
-
 	runner.run_file( "../scripts/size_test.bf" );
-	printf( "\n" );
-	
 	runner.run_file( "../scripts/weird_test.bf" );
-	printf( "\n" );
 	
-	runner.run_file( "../scripts/gol.bf" );
-	printf( "\n" );
-
 	ShowConsoleCursor( true );
 
 	return 0;

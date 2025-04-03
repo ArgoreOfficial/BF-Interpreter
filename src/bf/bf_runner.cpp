@@ -6,24 +6,7 @@
 #include <stdio.h>
 #include <conio.h>
 
-static bool is_legal_char( char _c )
-{
-	switch ( _c )
-	{
-	case '>': return true;
-	case '<': return true;
-	case '+': return true;
-	case '-': return true;
-	case '.': return true;
-	case ',': return true;
-	case '[': return true;
-	case ']': return true;
-	}
-
-	return false;
-}
-
-void BrainFuckRunner::power_cycle()
+void brainfuck_vm::power_cycle()
 {
 	pc = 0;
 	cmd = {};
@@ -37,59 +20,7 @@ void BrainFuckRunner::power_cycle()
 	bytecode.clear();
 }
 
-void BrainFuckRunner::parse_bytecode( std::string _source )
-{
-	const size_t size = _source.size();
-	char* pChar = _source.data();
-
-	BFBytecode current_bc{};
-
-	while ( pChar != _source.end()._Ptr )
-	{
-		char c = *pChar;
-		pChar++;
-		if ( !is_legal_char( c ) )
-		{
-			continue;
-		}
-
-		current_bc.count = 1;
-
-		switch ( c )
-		{
-		case '>': {
-			current_bc.type = BFCmd::Right;
-			while ( *pChar == '>' ) current_bc.count++, pChar++;
-		}; break;
-		case '<':
-		{
-			current_bc.type = BFCmd::Left;
-			while ( *pChar == '<' ) current_bc.count++, pChar++;
-		}; break;
-		case '+':
-		{
-			current_bc.type = BFCmd::Incr;
-			while ( *pChar == '+' ) current_bc.count++, pChar++;
-		}; break;
-		case '-':
-		{
-			current_bc.type = BFCmd::Decr;
-			while ( *pChar == '-' ) current_bc.count++, pChar++;
-		}; break;
-		case '.': { current_bc.type = BFCmd::pOut;      }; break;
-		case ',': { current_bc.type = BFCmd::pIn;       }; break;
-		case '[': { current_bc.type = BFCmd::LoopBegin; }; break;
-		case ']': { current_bc.type = BFCmd::LoopEnd;   }; break;
-		}
-
-		bytecode.push_back( current_bc );
-		current_bc = {};
-	}
-
-	bytecode.push_back( { BFCmd::NullTerm, 0 } );
-}
-
-void BrainFuckRunner::run_file( const std::string& _path )
+void brainfuck_vm::run_file( const std::string& _path )
 {
 	std::string source, line;
 	std::ifstream file( _path );
@@ -105,31 +36,33 @@ void BrainFuckRunner::run_file( const std::string& _path )
 	run( source );
 }
 
-void BrainFuckRunner::run( std::string _source )
+void brainfuck_vm::run( const std::string& _source )
 {
 	power_cycle();
-	parse_bytecode( _source );
+	
+	brainfuck_compiler bfc{ _source };
+	bfc.compile( bytecode );
 
-	incr_pc();
+	_incr_pc();
 
 	while ( cmd.type != 0 )
 	{
 		interpret_cmd();
-		incr_pc();
+		_incr_pc();
 	}
 }
 
-void BrainFuckRunner::interpret_cmd()
+void brainfuck_vm::interpret_cmd()
 {
 	switch ( cmd.type )
 	{
 	case BFCmd::Right: { pointer += cmd.count; } break;
 	case BFCmd::Left:  { pointer -= cmd.count; } break;
-	case BFCmd::Incr:  { here() += cmd.count; } break;
-	case BFCmd::Decr:  { here() -= cmd.count; } break;
+	case BFCmd::Incr:  { _here() += cmd.count; } break;
+	case BFCmd::Decr:  { _here() -= cmd.count; } break;
 
 	case BFCmd::pOut: { 
-		printf( "%c", (char)here() ); 
+		printf( "%c", (char)_here() ); 
 	} break;
 	case BFCmd::pIn: 
 	{
@@ -142,12 +75,12 @@ void BrainFuckRunner::interpret_cmd()
 		case 26:   in = '\0'; break;
 		}
 
-		here() = in;
+		_here() = in;
 	} break;
 
 	case BFCmd::LoopBegin:
 	{
-		if ( here() == 0 )
+		if ( _here() == 0 )
 		{
 			uint32_t loop_counter = 0;
 			do
@@ -155,19 +88,19 @@ void BrainFuckRunner::interpret_cmd()
 				if ( cmd.type == BFCmd::LoopBegin ) loop_counter++;
 				else if ( cmd.type == BFCmd::LoopEnd ) loop_counter--;
 
-				if ( loop_counter > 0 ) incr_pc();
+				if ( loop_counter > 0 ) _incr_pc();
 			} while ( loop_counter > 0 );
 		}
 		else
-			push_stack( pc - 1 );
+			_push_stack( pc - 1 );
 
 	} break;
 
 	case BFCmd::LoopEnd:
 	{
-		uint16_t jmp_point = pop_stack();
-		if ( here() != 0 )
-			jmp( jmp_point );
+		uint16_t jmp_point = _pop_stack();
+		if ( _here() != 0 )
+			_jmp( jmp_point );
 
 	} break;
 
