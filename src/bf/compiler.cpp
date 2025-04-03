@@ -32,10 +32,8 @@ int brainfuck_compiler::compile( std::vector<BFBytecode>& _out_vec )
 		_incr();
 
 		if( !is_legal_char( c ) )
-		{
 			continue;
-		}
-
+		
 		current_bc.count = 1;
 
 		switch( c )
@@ -43,22 +41,22 @@ int brainfuck_compiler::compile( std::vector<BFBytecode>& _out_vec )
 		case '>':
 		{
 			current_bc.type = BFCmd::Right;
-			while( _here() == '>' ) current_bc.count++, _incr();
+			current_bc.count += _count_sequence( '>' );
 		}; break;
 		case '<':
 		{
 			current_bc.type = BFCmd::Left;
-			while( _here() == '<' ) current_bc.count++, _incr();
+			current_bc.count += _count_sequence( '<' );
 		}; break;
 		case '+':
 		{
 			current_bc.type = BFCmd::Incr;
-			while( _here() == '+' ) current_bc.count++, _incr();
+			current_bc.count += _count_sequence( '+' );
 		}; break;
 		case '-':
 		{
 			current_bc.type = BFCmd::Decr;
-			while( _here() == '-' ) current_bc.count++, _incr();
+			current_bc.count += _count_sequence( '-' );
 		}; break;
 		case '.': { current_bc.type = BFCmd::pOut; }; break;
 		case ',': { current_bc.type = BFCmd::pIn; }; break;
@@ -78,4 +76,12 @@ int brainfuck_compiler::compile( std::vector<BFBytecode>& _out_vec )
 void brainfuck_compiler::_flush()
 {
 
+}
+
+size_t brainfuck_compiler::_count_sequence( char _char )
+{
+	size_t n = 0;
+	while( _here() == _char )
+		n++, _incr();
+	return n;
 }
