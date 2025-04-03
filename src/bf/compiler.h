@@ -4,17 +4,17 @@
 #include <stdint.h>
 #include <string>
 
-enum BFCmd
+enum BFCmd : uint8_t
 {
-	NullTerm = 0x0,
-	Right = 0x1,
-	Left = 0x2,
-	Incr = 0x3,
-	Decr = 0x4,
-	pOut = 0x5,
-	pIn = 0x6,
-	LoopBegin = 0x7,
-	LoopEnd = 0x8
+	NullTerm  = 0x0,
+	Right     = '>',
+	Left      = '<',
+	Incr      = '+',
+	Decr      = '-',
+	pOut      = '.',
+	pIn       = ',',
+	LoopBegin = '[',
+	LoopEnd   = ']'
 };
 
 struct BFBytecode

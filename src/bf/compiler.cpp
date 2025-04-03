@@ -35,33 +35,19 @@ int brainfuck_compiler::compile( std::vector<BFBytecode>& _out_vec )
 			continue;
 		
 		current_bc.count = 1;
+		current_bc.type = static_cast<BFCmd>( c );
 
 		switch( c )
 		{
-		case '>':
-		{
-			current_bc.type = BFCmd::Right;
-			current_bc.count += _count_sequence( '>' );
-		}; break;
-		case '<':
-		{
-			current_bc.type = BFCmd::Left;
-			current_bc.count += _count_sequence( '<' );
-		}; break;
-		case '+':
-		{
-			current_bc.type = BFCmd::Incr;
-			current_bc.count += _count_sequence( '+' );
-		}; break;
-		case '-':
-		{
-			current_bc.type = BFCmd::Decr;
-			current_bc.count += _count_sequence( '-' );
-		}; break;
-		case '.': { current_bc.type = BFCmd::pOut; }; break;
-		case ',': { current_bc.type = BFCmd::pIn; }; break;
-		case '[': { current_bc.type = BFCmd::LoopBegin; }; break;
-		case ']': { current_bc.type = BFCmd::LoopEnd; }; break;
+		case BFCmd::Right: current_bc.count += _count_sequence( BFCmd::Right ); break;
+		case BFCmd::Left:  current_bc.count += _count_sequence( BFCmd::Left  ); break;
+		case BFCmd::Incr:  current_bc.count += _count_sequence( BFCmd::Incr  ); break;
+		case BFCmd::Decr:  current_bc.count += _count_sequence( BFCmd::Decr  ); break;
+		
+		case BFCmd::pOut:      break;
+		case BFCmd::pIn:       break;
+		case BFCmd::LoopBegin: break;
+		case BFCmd::LoopEnd:   break;
 		}
 
 		m_compiled.push_back( current_bc );
