@@ -4,7 +4,9 @@
 #include <stdint.h>
 #include <string>
 
-enum BFCmd : uint8_t
+namespace brainfuck {
+
+enum opcode : uint8_t
 {
 	NullTerm  = 0x0,
 	Right     = '>',
@@ -17,13 +19,13 @@ enum BFCmd : uint8_t
 	LoopEnd   = ']'
 };
 
-struct BFBytecode
+struct instruction
 {
-	BFCmd type;
+	opcode type;
 	uint32_t count = 0;
 };
 
-struct brainfuck_compiler
+struct compiler
 {
 	enum class error_code
 	{
@@ -33,11 +35,11 @@ struct brainfuck_compiler
 		missing_loop_end
 	};
 
-	brainfuck_compiler( const std::string& _source ) :
+	compiler( const std::string& _source ) :
 		m_source{ _source }
 	{ }
 
-	int compile( std::vector<BFBytecode>& _out_vec );
+	error_code compile( std::vector<instruction>& _out_vec );
 
 private:
 
@@ -48,6 +50,8 @@ private:
 	size_t _count_sequence( char _char );
 
 	std::string m_source;
-	std::vector<BFBytecode> m_compiled;
+	std::vector<instruction> m_compiled;
 	size_t m_pointer = 0;
 };
+
+}

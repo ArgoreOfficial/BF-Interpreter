@@ -3,7 +3,7 @@
 
 #include <Windows.h>
 
-brainfuck_vm runner{};
+brainfuck::vm bf_vm{};
 
 void ShowConsoleCursor( bool showFlag )
 {
@@ -20,9 +20,9 @@ int main()
 {
 	ShowConsoleCursor( false );
 	
-	runner.run_file( "../scripts/hello_world.bf" );
-	runner.run_file( "../scripts/size_test.bf" );
-	runner.run_file( "../scripts/weird_test.bf" );
+	bf_vm.run_file( "../scripts/hello_world.bf" );
+	bf_vm.run_file( "../scripts/size_test.bf" );
+	bf_vm.run_file( "../scripts/weird_test.bf" );
 	
 	ShowConsoleCursor( true );
 

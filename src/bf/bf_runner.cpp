@@ -5,11 +5,12 @@
 
 #include <stdio.h>
 #include <conio.h>
+#include <chrono>
 
-void brainfuck_vm::power_cycle()
+void brainfuck::vm::power_cycle()
 {
 	pc = 0;
-	cmd = {};
+	instr = {};
 
 	loop_stack_counter = 0;
 	pointer = 0;
@@ -20,7 +21,7 @@ void brainfuck_vm::power_cycle()
 	bytecode.clear();
 }
 
-void brainfuck_vm::run_file( const std::string& _path )
+void brainfuck::vm::run_file( const std::string& _path )
 {
 	std::string source, line;
 	std::ifstream file( _path );
@@ -36,35 +37,41 @@ void brainfuck_vm::run_file( const std::string& _path )
 	run( source );
 }
 
-void brainfuck_vm::run( const std::string& _source )
+void brainfuck::vm::run( const std::string& _source )
 {
 	power_cycle();
 	
-	brainfuck_compiler bfc{ _source };
+	compiler bfc{ _source };
 	bfc.compile( bytecode );
 
 	_incr_pc();
+	auto start = std::chrono::system_clock::now();
 
-	while ( cmd.type != 0 )
+	while ( instr.type != 0 )
 	{
-		interpret_cmd();
+		interpret_instr();
 		_incr_pc();
 	}
+
+	auto end = std::chrono::system_clock::now();
+	auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>( end - start );
+	double milliseconds = static_cast<double>( elapsed.count() ) / 1000.0;
+	printf( "Executed in %.03fms\n", milliseconds );
 }
 
-void brainfuck_vm::interpret_cmd()
+void brainfuck::vm::interpret_instr()
 {
-	switch ( cmd.type )
+	switch ( instr.type )
 	{
-	case BFCmd::Right: { pointer += cmd.count; } break;
-	case BFCmd::Left:  { pointer -= cmd.count; } break;
-	case BFCmd::Incr:  { _here() += cmd.count; } break;
-	case BFCmd::Decr:  { _here() -= cmd.count; } break;
+	case opcode::Right: { pointer += instr.count; } break;
+	case opcode::Left:  { pointer -= instr.count; } break;
+	case opcode::Incr:  { _here() += instr.count; } break;
+	case opcode::Decr:  { _here() -= instr.count; } break;
 
-	case BFCmd::pOut: { 
+	case opcode::pOut: { 
 		printf( "%c", (char)_here() ); 
 	} break;
-	case BFCmd::pIn: 
+	case opcode::pIn: 
 	{
 		char in = _getch();
 
@@ -78,15 +85,15 @@ void brainfuck_vm::interpret_cmd()
 		_here() = in;
 	} break;
 
-	case BFCmd::LoopBegin:
+	case opcode::LoopBegin:
 	{
 		if ( _here() == 0 )
 		{
 			uint32_t loop_counter = 0;
 			do
 			{
-				if ( cmd.type == BFCmd::LoopBegin ) loop_counter++;
-				else if ( cmd.type == BFCmd::LoopEnd ) loop_counter--;
+				if      ( instr.type == opcode::LoopBegin ) loop_counter++;
+				else if ( instr.type == opcode::LoopEnd   ) loop_counter--;
 
 				if ( loop_counter > 0 ) _incr_pc();
 			} while ( loop_counter > 0 );
@@ -96,7 +103,7 @@ void brainfuck_vm::interpret_cmd()
 
 	} break;
 
-	case BFCmd::LoopEnd:
+	case opcode::LoopEnd:
 	{
 		uint16_t jmp_point = _pop_stack();
 		if ( _here() != 0 )

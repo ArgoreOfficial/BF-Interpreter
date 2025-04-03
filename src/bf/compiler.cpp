@@ -17,14 +17,14 @@ static bool is_legal_char( char _c )
 	return false;
 }
 
-int brainfuck_compiler::compile( std::vector<BFBytecode>& _out_vec )
+brainfuck::compiler::error_code brainfuck::compiler::compile( std::vector<instruction>& _out_vec )
 {
 	_flush();
 
 	if( m_source.empty() )
-		return 1;
+		return error_code::no_source_input;
 
-	BFBytecode current_bc{};
+	instruction current_instr{};
 
 	while( m_pointer < m_source.size() )
 	{
@@ -34,37 +34,38 @@ int brainfuck_compiler::compile( std::vector<BFBytecode>& _out_vec )
 		if( !is_legal_char( c ) )
 			continue;
 		
-		current_bc.count = 1;
-		current_bc.type = static_cast<BFCmd>( c );
+		current_instr.count = 1;
+		current_instr.type = static_cast<opcode>( c );
 
 		switch( c )
 		{
-		case BFCmd::Right: current_bc.count += _count_sequence( BFCmd::Right ); break;
-		case BFCmd::Left:  current_bc.count += _count_sequence( BFCmd::Left  ); break;
-		case BFCmd::Incr:  current_bc.count += _count_sequence( BFCmd::Incr  ); break;
-		case BFCmd::Decr:  current_bc.count += _count_sequence( BFCmd::Decr  ); break;
+		case opcode::Right: current_instr.count += _count_sequence( opcode::Right ); break;
+		case opcode::Left:  current_instr.count += _count_sequence( opcode::Left  ); break;
+		case opcode::Incr:  current_instr.count += _count_sequence( opcode::Incr  ); break;
+		case opcode::Decr:  current_instr.count += _count_sequence( opcode::Decr  ); break;
 		
-		case BFCmd::pOut:      break;
-		case BFCmd::pIn:       break;
-		case BFCmd::LoopBegin: break;
-		case BFCmd::LoopEnd:   break;
+		case opcode::pOut:      break;
+		case opcode::pIn:       break;
+		case opcode::LoopBegin: break;
+		case opcode::LoopEnd:   break;
 		}
 
-		m_compiled.push_back( current_bc );
-		current_bc = {};
+		m_compiled.push_back( current_instr );
+		current_instr = {};
 	}
 
-	m_compiled.push_back( { BFCmd::NullTerm, 0 } );
+	m_compiled.push_back( { opcode::NullTerm, 0 } );
 	_out_vec = m_compiled;
-	return 0;
+	return error_code::success;
 }
 
-void brainfuck_compiler::_flush()
+void brainfuck::compiler::_flush()
 {
-
+	m_compiled.clear();
+	m_pointer = 0;
 }
 
-size_t brainfuck_compiler::_count_sequence( char _char )
+size_t brainfuck::compiler::_count_sequence( char _char )
 {
 	size_t n = 0;
 	while( _here() == _char )
