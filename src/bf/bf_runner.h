@@ -34,11 +34,12 @@ protected:
 	}
 
 	uint8_t& _here() { return cell_memory[ pointer ]; }
+	char _getinput();
 
-	std::vector<brainfuck::instruction> bytecode;
+	std::vector<instruction> bytecode;
 
 	uint16_t pc = 0;
-	brainfuck::instruction instr = {};
+	instruction instr = {};
 
 	int32_t pointer = 0;
 	uint8_t cell_memory[ UINT16_MAX ];

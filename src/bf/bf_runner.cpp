@@ -79,27 +79,28 @@ void brainfuck::vm::interpret_instr()
 	{
 	case opcode::Right: pointer += instr.count; break;
 	case opcode::Left:  pointer -= instr.count; break;
-	case opcode::Incr:  _here() += instr.count; break;
-	case opcode::Decr:  _here() -= instr.count; break;
-
+	
+	case opcode::Incr: _here() += instr.count; break;
+	case opcode::Decr: _here() -= instr.count; break;
+	
 	case opcode::pOut: printf( "%c", (char)_here() ); break;
-
-	case opcode::pIn: 
-	{
-		char in = _getch();
-
-		switch ( in ) // special cases
-		{
-		case '\r': in = '\n'; break;
-		case EOF:  in = '\0'; break;
-		case 26:   in = '\0'; break;
-		}
-
-		_here() = in;
-	} break;
+	case opcode::pIn:  _here() = _getinput();         break;
 
 	case opcode::LoopBegin: if ( _here() == 0 ) _jmp( instr.partner ); break;
 	case opcode::LoopEnd:   if ( _here() != 0 ) _jmp( instr.partner ); break;
-
 	}
+}
+
+char brainfuck::vm::_getinput()
+{
+	char in = _getch();
+
+	switch( in ) // special cases
+	{
+	case '\r': in = '\n'; break;
+	case EOF:  in = '\0'; break;
+	case 26:   in = '\0'; break;
+	}
+
+	return in;
 }
