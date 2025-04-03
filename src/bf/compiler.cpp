@@ -46,13 +46,28 @@ brainfuck::compiler::error_code brainfuck::compiler::compile( std::vector<instru
 		
 		case opcode::pOut:      break;
 		case opcode::pIn:       break;
-		case opcode::LoopBegin: break;
-		case opcode::LoopEnd:   break;
+		case opcode::LoopBegin:
+		{
+			loop_stack.push( { m_compiled.size() } );
+		} break;
+		case opcode::LoopEnd:
+		{
+			if( loop_stack.empty() )
+				return error_code::missing_loop_begin;
+
+			loop_range range = loop_stack.top();
+			loop_stack.pop();
+			m_compiled[ range.begin ].partner = m_pointer - 1;
+			current_instr.partner = range.begin;
+		} break;
 		}
 
 		m_compiled.push_back( current_instr );
 		current_instr = {};
 	}
+
+	if( !loop_stack.empty() )
+		return error_code::missing_loop_end;
 
 	m_compiled.push_back( { opcode::NullTerm, 0 } );
 	_out_vec = m_compiled;

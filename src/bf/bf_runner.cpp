@@ -42,7 +42,21 @@ void brainfuck::vm::run( const std::string& _source )
 	power_cycle();
 	
 	compiler bfc{ _source };
-	bfc.compile( bytecode );
+	compiler::error_code err = bfc.compile( bytecode );
+	switch( err )
+	{
+		case compiler::error_code::missing_loop_begin: 
+			printf( "Compile Error: Missing [ to match ] at X:Y\n" );
+			return;
+
+		case compiler::error_code::missing_loop_end: 
+			printf( "Compile Error: Missing ] to match [ at X:Y\n" );
+			return;
+		
+		case compiler::error_code::no_source_input: 
+			printf( "No source input\n" );
+			return;
+	}
 
 	_incr_pc();
 	auto start = std::chrono::system_clock::now();

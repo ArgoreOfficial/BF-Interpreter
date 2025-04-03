@@ -3,6 +3,7 @@
 #include <vector>
 #include <stdint.h>
 #include <string>
+#include <stack>
 
 namespace brainfuck {
 
@@ -23,6 +24,12 @@ struct instruction
 {
 	opcode type;
 	uint32_t count = 0;
+	uint32_t partner = 0;
+};
+
+struct loop_range
+{
+	size_t begin;
 };
 
 struct compiler
@@ -51,6 +58,7 @@ private:
 
 	std::string m_source;
 	std::vector<instruction> m_compiled;
+	std::stack<loop_range> loop_stack;
 	size_t m_pointer = 0;
 };
 

@@ -23,7 +23,8 @@ int main()
 	bf_vm.run_file( "../scripts/hello_world.bf" );
 	bf_vm.run_file( "../scripts/size_test.bf" );
 	bf_vm.run_file( "../scripts/weird_test.bf" );
-	
+	bf_vm.run( "++[-.]]" );
+
 	ShowConsoleCursor( true );
 
 	return 0;
