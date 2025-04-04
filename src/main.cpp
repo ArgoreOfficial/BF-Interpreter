@@ -5,7 +5,7 @@
 
 brainfuck::vm bf_vm{};
 
-void ShowConsoleCursor( bool showFlag )
+void set_console_cursor_visible( bool showFlag )
 {
 	HANDLE out = GetStdHandle( STD_OUTPUT_HANDLE );
 
@@ -18,7 +18,7 @@ void ShowConsoleCursor( bool showFlag )
 
 int main()
 {
-	ShowConsoleCursor( false );
+	set_console_cursor_visible( false );
 	
 	bf_vm.run_file( "../scripts/hello_world.bf" );
 	bf_vm.run_file( "../scripts/size_test.bf" );
@@ -26,7 +26,7 @@ int main()
 	bf_vm.run_file( "../scripts/broken.bf" );
 	bf_vm.run( "++[-.]++++.[" );
 
-	ShowConsoleCursor( true );
-
+	set_console_cursor_visible( true );
+	
 	return 0;
 }
